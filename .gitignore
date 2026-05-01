@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Flask
+instance/
+.webassets-cache
+*.log
+flask_session/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# Instance config (if storing secrets)
+instance/
