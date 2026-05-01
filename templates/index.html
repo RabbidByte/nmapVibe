@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nmap Web Scanner</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="accent">&lt;</span>Nmap Scanner<span class="accent">/&gt;</span></h1>
+            <p class="subtitle">Network vulnerability scanner</p>
+        </header>
+
+        <main>
+            <section class="scan-form">
+                <h2>Scan Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="target">Target IP / CIDR</label>
+                    <input type="text" id="target" placeholder="e.g., 192.168.1.1 or 192.168.1.0/24" autocomplete="off">
+                    <span class="error" id="target-error"></span>
+                </div>
+
+                <div class="form-section">
+                    <h3>Scan Types</h3>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="synScan" checked>
+                            <span class="checkbox-custom"></span>
+                            -sS TCP SYN Scan
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="udpScan">
+                            <span class="checkbox-custom"></span>
+                            -sU UDP Scan
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="versionDetect">
+                            <span class="checkbox-custom"></span>
+                            -sV Version Detection
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="osDetect">
+                            <span class="checkbox-custom"></span>
+                            -O OS Detection
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="aggressive">
+                            <span class="checkbox-custom"></span>
+                            -A Aggressive Scan
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Port Options</h3>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="portOption" value="common" checked>
+                            <span class="radio-custom"></span>
+                            Common Ports (default)
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="portOption" value="all">
+                            <span class="radio-custom"></span>
+                            All Ports (-p-)
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="portOption" value="custom">
+                            <span class="radio-custom"></span>
+                            Custom Range
+                        </label>
+                    </div>
+                    <div class="form-group" id="portRangeGroup" style="display: none;">
+                        <input type="text" id="portRange" placeholder="e.g., 1-1000 or 80,443,8080">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Timing</h3>
+                    <div class="select-wrapper">
+                        <select id="timing">
+                            <option value="0">-T0 Paranoid</option>
+                            <option value="1">-T1 Sneaky</option>
+                            <option value="2">-T2 Polite</option>
+                            <option value="3" selected>-T3 Normal</option>
+                            <option value="4">-T4 Aggressive</option>
+                            <option value="5">-T5 Insane</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Custom Arguments</h3>
+                    <input type="text" id="customArgs" placeholder="Additional nmap flags (e.g., --script vuln)">
+                </div>
+
+                <button id="runScan" class="btn-primary">
+                    <span class="btn-icon">&#9654;</span>
+                    Run Scan
+                </button>
+            </section>
+
+            <section class="results" id="resultsSection">
+                <div class="results-header">
+                    <h2>Results</h2>
+                    <button id="exportBtn" class="btn-secondary" style="display: none;">
+                        <span class="btn-icon">&#8681;</span>
+                        Export JSON
+                    </button>
+                </div>
+
+                <div id="statusIndicator" class="status idle">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready to scan</span>
+                </div>
+
+                <div id="errorMessage" class="error-banner" style="display: none;"></div>
+
+                <div id="scanSummary" class="summary-card" style="display: none;">
+                    <div class="summary-item">
+                        <span class="label">Target:</span>
+                        <span class="value" id="summaryTarget">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Scan Type:</span>
+                        <span class="value" id="summaryType">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Duration:</span>
+                        <span class="value" id="summaryDuration">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Hosts Up:</span>
+                        <span class="value" id="summaryHostsUp">-</span>
+                    </div>
+                </div>
+
+                <div id="resultsTable" class="table-container" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Host</th>
+                                <th>Port</th>
+                                <th>Protocol</th>
+                                <th>State</th>
+                                <th>Service</th>
+                                <th>Version</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noResults" class="empty-state" style="display: none;">
+                    <p>No open ports found</p>
+                </div>
+
+                <div id="loadingState" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Scanning in progress...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
