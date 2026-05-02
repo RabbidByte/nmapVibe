@@ -1,20 +1,29 @@
+# Ignore all dot-folders and their contents
+.*/
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
 *.so
 *.egg-info/
 *.egg
 dist/
 build/
-*.egg-info/
 .eggs/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Virtual Environment
 venv/
 env/
 ENV/
 .venv/
+.env/
 
 # Flask
 instance/
@@ -22,10 +31,9 @@ instance/
 *.log
 flask_session/
 
-# Environment variables
+# Environment variables (files)
 .env
 .env.*
-!.env.example
 
 # IDE
 .vscode/
