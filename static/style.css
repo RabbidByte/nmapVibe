@@ -432,6 +432,15 @@ tbody tr:hover {
     color: var(--warning);
 }
 
+.state-up {
+    color: var(--accent-green-bright);
+    font-weight: 600;
+}
+
+.state-down {
+    color: var(--text-secondary);
+}
+
 .empty-state {
     text-align: center;
     padding: 40px;

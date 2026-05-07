@@ -195,9 +195,13 @@ function displayResults(results) {
     const tbody = document.getElementById('resultsBody');
     tbody.innerHTML = '';
     
-    let hasHosts = false;
-    
-    hosts.forEach(host => {
+     let hasHosts = false;
+
+     if (isPingScan) {
+         hosts.sort((a, b) => (b.status === 'up') - (a.status === 'up'));
+     }
+     
+     hosts.forEach(host => {
         hasHosts = true;
         const hostIp = host.addresses.find(a => a.addrtype === 'ipv4')?.addr || host.addresses[0]?.addr || '-';
         
