@@ -1,5 +1,6 @@
 let lastResults = null;
 let lastTarget = '';
+let isPingScan = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkNmapInstalled();
@@ -27,6 +28,30 @@ function setupEventListeners() {
     document.querySelectorAll('input[name="portOption"]').forEach(radio => {
         radio.addEventListener('change', handlePortOptionChange);
     });
+    
+    document.getElementById('pingScan').addEventListener('change', handlePingScanChange);
+}
+
+function handlePingScanChange(e) {
+    isPingScan = e.target.checked;
+    const scanTypes = ['synScan', 'udpScan', 'versionDetect', 'osDetect', 'aggressive'];
+    const portOptions = document.querySelectorAll('input[name="portOption"]');
+    const portRangeGroup = document.getElementById('portRangeGroup');
+    
+    scanTypes.forEach(id => {
+        document.getElementById(id).disabled = isPingScan;
+        if (isPingScan) document.getElementById(id).checked = false;
+    });
+    
+    portOptions.forEach(radio => {
+        radio.disabled = isPingScan;
+        if (isPingScan) radio.checked = false;
+    });
+    
+    if (isPingScan) {
+        portRangeGroup.style.display = 'none';
+        document.querySelector('input[name="portOption"][value="common"]').checked = true;
+    }
 }
 
 function handlePortOptionChange(e) {
@@ -37,16 +62,20 @@ function handlePortOptionChange(e) {
 function buildNmapCommand(target, options) {
     let cmd = ['nmap'];
     
-    if (options.synScan) cmd.push('-sS');
-    if (options.udpScan) cmd.push('-sU');
-    if (options.versionDetect) cmd.push('-sV');
-    if (options.osDetect) cmd.push('-O');
-    if (options.aggressive) cmd.push('-A');
-    
-    if (options.allPorts) {
-        cmd.push('-p-');
-    } else if (options.portRange) {
-        cmd.push('-p', options.portRange);
+    if (options.pingScan) {
+        cmd.push('-sn');
+    } else {
+        if (options.synScan) cmd.push('-sS');
+        if (options.udpScan) cmd.push('-sU');
+        if (options.versionDetect) cmd.push('-sV');
+        if (options.osDetect) cmd.push('-O');
+        if (options.aggressive) cmd.push('-A');
+        
+        if (options.allPorts) {
+            cmd.push('-p-');
+        } else if (options.portRange) {
+            cmd.push('-p', options.portRange);
+        }
     }
     
     cmd.push(`-T${options.timing}`);
@@ -80,6 +109,7 @@ async function runScan() {
     }
     
     const options = {
+        pingScan: document.getElementById('pingScan').checked,
         synScan: document.getElementById('synScan').checked,
         udpScan: document.getElementById('udpScan').checked,
         versionDetect: document.getElementById('versionDetect').checked,
@@ -138,6 +168,8 @@ function displayResults(results) {
     const resultsTable = document.getElementById('resultsTable');
     const noResults = document.getElementById('noResults');
     const exportBtn = document.getElementById('exportBtn');
+    const normalHeaders = document.getElementById('normalHeaders');
+    const pingHeaders = document.getElementById('pingHeaders');
     
     summaryCard.style.display = 'grid';
     resultsTable.style.display = 'block';
@@ -145,44 +177,50 @@ function displayResults(results) {
     
     const runstats = results.runstats || {};
     const allHosts = results.hosts || [];
-    const hosts = allHosts.filter(h => h.status === 'up');
+    const hosts = allHosts; // Show all hosts for ping scan
     const scaninfo = results.scaninfo || {};
+    const isPingScan = !scaninfo.type; // Ping scan has no scan type info
     
     document.getElementById('summaryTarget').textContent = lastTarget || '-';
-    
-    document.getElementById('summaryType').textContent = scaninfo.type || '-';
-    
+    document.getElementById('summaryType').textContent = isPingScan ? 'ping' : (scaninfo.type || '-');
     document.getElementById('summaryDuration').textContent = runstats.finished?.elapsed 
         ? `${parseFloat(runstats.finished.elapsed).toFixed(2)}s`
         : '-';
-    
     document.getElementById('summaryHostsUp').textContent = runstats.hosts?.up || '0';
+    
+    // Toggle table headers
+    normalHeaders.style.display = isPingScan ? 'none' : 'table-row';
+    pingHeaders.style.display = isPingScan ? 'table-row' : 'none';
     
     const tbody = document.getElementById('resultsBody');
     tbody.innerHTML = '';
     
-    let openPorts = 0;
     let hasHosts = false;
     
     hosts.forEach(host => {
         hasHosts = true;
         const hostIp = host.addresses.find(a => a.addrtype === 'ipv4')?.addr || host.addresses[0]?.addr || '-';
         
-        if (host.ports.length === 0) {
+        if (isPingScan) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="host-cell">${hostIp}</td>
+                <td class="state-${host.status}">${host.status}</td>
+            `;
+            tbody.appendChild(tr);
+        } else if (host.ports.length === 0) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="host-cell">${hostIp}</td>
                 <td>-</td>
                 <td>-</td>
-                <td class="state-up">up</td>
+                <td class="state-${host.status}">${host.status}</td>
                 <td>-</td>
                 <td>-</td>
             `;
             tbody.appendChild(tr);
         } else {
             host.ports.forEach(port => {
-                if (port.state === 'open') openPorts++;
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="host-cell">${hostIp}</td>

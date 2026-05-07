@@ -140,15 +140,29 @@ def api_scan():
     # Build nmap command
     cmd = ['nmap']
     
-# Scan types
+    # Scan types
+    if options.get('pingScan'):
+        cmd.append('-sn')
+    else:
+        if options.get('synScan'):
+            cmd.append('-sS')
+        if options.get('udpScan'):
+            cmd.append('-sU')
+        if options.get('versionDetect'):
+            cmd.append('-sV')
+        if options.get('osDetect'):
+            cmd.append('-O')
+        if options.get('aggressive'):
+            cmd.append('-A')
     
-    # Port options
-    if options.get('allPorts'):
-        cmd.append('-p-')
-    elif options.get('portRange'):
-        port_range = options.get('portRange', '').strip()
-        if port_range:
-            cmd.extend(['-p', port_range])
+    # Port options (skip if ping scan)
+    if not options.get('pingScan'):
+        if options.get('allPorts'):
+            cmd.append('-p-')
+        elif options.get('portRange'):
+            port_range = options.get('portRange', '').strip()
+            if port_range:
+                cmd.extend(['-p', port_range])
     
     # Timing
     timing = options.get('timing', '3')

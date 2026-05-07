@@ -54,6 +54,11 @@
                             <span class="checkbox-custom"></span>
                             -A Aggressive Scan
                         </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="pingScan">
+                            <span class="checkbox-custom"></span>
+                            -sn Ping Scan (Host Discovery Only)
+                        </label>
                     </div>
                 </div>
 
@@ -144,14 +149,18 @@
                 <div id="resultsTable" class="table-container" style="display: none;">
                     <table>
                         <thead>
-                            <tr>
-                                <th>Host</th>
-                                <th>Port</th>
-                                <th>Protocol</th>
-                                <th>State</th>
-                                <th>Service</th>
-                                <th>Version</th>
-                            </tr>
+                    <tr id="normalHeaders">
+                        <th>Host</th>
+                        <th>Port</th>
+                        <th>Protocol</th>
+                        <th>State</th>
+                        <th>Service</th>
+                        <th>Version</th>
+                    </tr>
+                    <tr id="pingHeaders" style="display: none;">
+                        <th>Host</th>
+                        <th>Status</th>
+                    </tr>
                         </thead>
                         <tbody id="resultsBody">
                         </tbody>
