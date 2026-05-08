@@ -180,12 +180,14 @@ def api_scan():
     if custom_args:
         cmd.extend(custom_args.split())
     
+    timeout = int(options.get('timeout', 300))
+    
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=300
+            timeout=timeout
         )
         
         # Check return code (0 = success, 1 = some hosts down but valid)
@@ -211,7 +213,7 @@ def api_scan():
         })
     
     except subprocess.TimeoutExpired:
-        return jsonify({'success': False, 'error': 'Scan timed out (max 5 minutes)'}), 500
+        return jsonify({'success': False, 'error': f'Scan timed out (max {timeout} seconds)'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

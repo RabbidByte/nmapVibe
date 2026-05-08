@@ -120,6 +120,7 @@ async function runScan() {
             ? document.getElementById('portRange').value 
             : '',
         timing: document.getElementById('timing').value,
+        timeout: parseInt(document.getElementById('timeout').value) || 300,
         customArgs: document.getElementById('customArgs').value
     };
     
