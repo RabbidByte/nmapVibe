@@ -66,12 +66,12 @@ pip install flask
 python app.py
 ```
 
-**Option B: Flask CLI**
+**Option B: Run as root (required for nmap features)**
+
+Certain functions execute nmap commands that require root privileges. To use these features, run the virtual environment's Python interpreter with sudo:
 
 ```bash
-export FLASK_APP=app.py
-export FLASK_DEBUG=1
-flask run --host=127.0.0.1 --port=5000
+sudo .venv/bin/python app.py
 ```
 
 > **Note:** This app is designed for local use only. Never expose it to public networks.
