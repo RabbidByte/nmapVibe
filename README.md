@@ -22,6 +22,12 @@
 
 ---
 
+## Description
+
+nmapVibe is a web-based frontend for the standard `nmap` network scanner. It provides a graphical interface to configure scan targets, scan types, port ranges, and timing templates, then executes nmap via the backend and displays the parsed results — all in your browser. The application itself performs no scanning; it simply facilitates running nmap through a convenient UI.
+
+---
+
 ## Installation
 
 Refer to [`n00b_notes.md`](n00b_notes.md) for detailed setup instructions, including:
